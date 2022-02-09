@@ -154,3 +154,67 @@ Note that the maintainer(s) may impose restrictions, such as "Signed-off-by" req
 Merge workflow
 The merge workflow works by copying branches between upstream and downstream. Upstream can merge contributions into the official history; downstream base their work on the official history.
 
+There are three main tools that can be used for this:
+
+git-push[1] copies your branches to a remote repository, usually to one that can be read by all involved parties;
+
+git-fetch[1] that copies remote branches to your repository; and
+
+git-pull[1] that does fetch and merge in one go.
+
+Note the last point. Do not use git pull unless you actually want to merge the remote branch.
+
+Getting changes out is easy:
+
+Recipe: Push/pull: Publishing branches/topics
+git push <remote> <branch> and tell everyone where they can fetch from.
+
+You will still have to tell people by other means, such as mail. (Git provides the git-request-pull[1] to send preformatted pull requests to upstream maintainers to simplify this task.)
+
+If you just want to get the newest copies of the integration branches, staying up to date is easy too:
+
+Recipe: Push/pull: Staying up to date
+Use git fetch <remote> or git remote update to stay up to date.
+
+Then simply fork your topic branches from the stable remotes as explained earlier.
+
+If you are a maintainer and would like to merge other people’s topic branches to the integration branches, they will typically send a request to do so by mail. Such a request looks like
+
+Please pull from
+    <URL> <branch>
+In that case, git pull can do the fetch and merge in one go, as follows.
+
+Recipe: Push/pull: Merging remote topics
+git pull <URL> <branch>
+
+Occasionally, the maintainer may get merge conflicts when they try to pull changes from downstream. In this case, they can ask downstream to do the merge and resolve the conflicts themselves (perhaps they will know better how to resolve them). It is one of the rare cases where downstream should merge from upstream.
+
+Patch workflow
+If you are a contributor that sends changes upstream in the form of emails, you should use topic branches as usual (see above). Then use git-format-patch[1] to generate the corresponding emails (highly recommended over manually formatting them because it makes the maintainer’s life easier).
+
+Recipe: format-patch/am: Publishing branches/topics
+git format-patch -M upstream..topic to turn them into preformatted patch files
+
+git send-email --to=<recipient> <patches>
+
+See the git-format-patch[1] and git-send-email[1] manpages for further usage notes.
+
+If the maintainer tells you that your patch no longer applies to the current upstream, you will have to rebase your topic (you cannot use a merge because you cannot format-patch merges):
+
+Recipe: format-patch/am: Keeping topics up to date
+git pull --rebase <URL> <branch>
+
+You can then fix the conflicts during the rebase. Presumably you have not published your topic other than by mail, so rebasing it is not a problem.
+
+If you receive such a patch series (as maintainer, or perhaps as a reader of the mailing list it was sent to), save the mails to files, create a new topic branch and use git am to import the commits:
+
+Recipe: format-patch/am: Importing patches
+git am < patch
+
+One feature worth pointing out is the three-way merge, which can help if you get conflicts: git am -3 will use index information contained in patches to figure out the merge base. See git-am[1] for other options.
+
+SEE ALSO
+gittutorial[7], git-push[1], git-pull[1], git-merge[1], git-rebase[1], git-format-patch[1], git-send-email[1], git-am[1]
+
+GIT
+Part of the git[1] suite
